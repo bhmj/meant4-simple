@@ -2,18 +2,14 @@
 
 ## What is it?
 
-Test task for meant4.com
+Sample factorial calculating task. Two working versions and an idea.
 
-Compiled and checked with go 1.13.6.
+v1: calculate two factorials simultaniously.   
+v2: calculate N factorials _wisely_.  
+v3: same as v2 but moving simultaneously _from both sides_ of number axis (not implemented).
+
+Compiled and checked with go 1.16.3.
 
 ## Building, testing and running
 
-Build: `go build .`  
-Test: `go test .`  
-Run locally: `go run .`  
-Dockerize: `docker build . --tag bhmj`  
-Run in docker: `docker run -p 8989:8989 bhmj`  
-
-## Details
-
-The resulting numbers are strings since it is a safe way to represent such large values.
+Run `make help`  to get info.
