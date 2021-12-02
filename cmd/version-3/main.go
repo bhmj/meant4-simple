@@ -29,10 +29,8 @@ type queryParameter struct {
 }
 
 type spanResult struct {
-	Low      int
-	High     int
-	Position int
-	Result   *big.Int
+	High   int
+	Result *big.Int
 }
 
 type valuedParameters []queryParameter
@@ -47,7 +45,7 @@ func (pp positionedParameters) Len() int           { return len(pp) }
 func (pp positionedParameters) Less(i, j int) bool { return pp[i].Position < pp[j].Position }
 func (pp positionedParameters) Swap(i, j int)      { pp[i], pp[j] = pp[j], pp[i] }
 
-func factorialSpan(numbers []queryParameter, low, high, position int, target *spanResult) {
+func factorialSpan(numbers []queryParameter, low, high int, target *spanResult) {
 	bigOne := big.NewInt(1)
 	bigHead := big.NewInt(int64(low))
 	result := big.NewInt(1)
@@ -68,44 +66,44 @@ func factorialSpan(numbers []queryParameter, low, high, position int, target *sp
 		head++                       // int math
 	}
 
-	*target = spanResult{Low: low, High: high, Position: position, Result: result}
+	*target = spanResult{High: high, Result: result}
 }
 
 const Parallelism int = 8 // TODO: count CPUs or ...?
 
 // calculateFactorials does it wisely
 func calculateFactorials(vp valuedParameters) []*big.Int {
-	sort.Sort(vp)
-
-	var wg sync.WaitGroup
+	sort.Sort(vp) // by value asc
 
 	threads := Parallelism
-	if vp[len(vp)-1].Number < 20 { // do not spawn if max number is too small
+	maxNumber := vp[len(vp)-1].Number
+	if maxNumber < 2000 { // do not parallel if max number is not worth it
 		threads = 1
 	}
 
-	chunks := make(spanResults, threads)
+	spans := make(spanResults, threads)
 
+	var wg sync.WaitGroup
 	low := 1
-	total := vp[len(vp)-1].Number
+
 	for i := 1; i <= threads; i++ {
 		// spawn parallel calculations
 		wg.Add(1)
-		high := total * i / threads
-		go func(low, high, pos int) { factorialSpan(vp, low, high, pos, &chunks[pos-1]); wg.Done() }(low, high, i)
+		high := maxNumber * i / threads
+		go func(low, high, pos int) { factorialSpan(vp, low, high, &spans[pos-1]); wg.Done() }(low, high, i)
 		low = high + 1
 	}
 	wg.Wait()
 
-	for _, chunk := range chunks {
+	for _, span := range spans {
 		for _, v := range vp {
-			if v.Number > chunk.High {
-				v.Result.Mul(v.Result, chunk.Result)
+			if v.Number > span.High {
+				v.Result.Mul(v.Result, span.Result)
 			}
 		}
 	}
 
-	sort.Sort(positionedParameters(vp))
+	sort.Sort(positionedParameters(vp)) // by position in query
 
 	var result []*big.Int
 	for _, v := range vp {
