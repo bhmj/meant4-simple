@@ -13,14 +13,13 @@ v1 : 10.90 seconds
 v2 : 9.47 seconds  
 v3 : 1.38 seconds  
 
-Compiled and checked with go 1.16.3.
+Compiled and checked with go 1.17.
 
 ## Building, testing and running
 
-Run `make help`  to get info.
+Run `make all` to build all three versions in ./build/.  
+Run `make help` to get more info.  
 
-Sample commands:  
+Sample command:  
 
-v1 : `time curl --request POST --url http://localhost:8989/calculate --data '{"a": 200000, "b": 300000}' -o /dev/null`  
-v2 : `time curl --request POST --url http://localhost:8989/calculate --data '{"numbers": [200000, 300000]}' -o /dev/null`  
-v3 : the same as v2  
+`time curl --request POST --url http://localhost:8989/calculate --data '{"numbers": [200000, 300000]}' -o /dev/null`  

@@ -16,18 +16,19 @@ func TestMain(t *testing.T) {
 		Output string
 	}{
 		// different invalid inputs
-		{``, 400, invalidInput},
-		{`{}`, 400, invalidInput},
-		{`foo`, 400, invalidInput},
-		{`{"a":0, "b":1}`, 400, invalidInput},
-		{`{"a":1, "b":-1}`, 400, invalidInput},
-		{`{"a":"1", "b":"1"}`, 400, invalidInput}, // we want numbers in input
+		{``, 400, errInvalidInput},
+		{`[]`, 400, errInvalidInput},
+		{`foo`, 400, errInvalidInput},
+		{`{"numbers": [0, 1]}`, 400, errInvalidInput},
+		{`{"numbers": [2, 3, 4]}`, 400, errTwoNumbersExpected},
+		{`{"numbers": [1, -1]}`, 400, errInvalidInput},
+		{`{"numbers": ["1", "1"]}`, 400, errInvalidInput}, // we want numbers in input
 		// valid inputs
-		{`{"a":1, "b":1}`, 200, `{"a!":"1", "b!":"1"}`},
-		{`{"a":5, "b":10}`, 200, `{"a!":"120", "b!":"3628800"}`},
+		{`{"numbers": [1, 1]}`, 200, `[1,1]`},
+		{`{"numbers": [5, 10]}`, 200, `[120,3628800]`},
 		// large values (results taken from https://onlinemschool.com/math/formula/factorial_table/)
-		{`{"a":19, "b":20}`, 200, `{"a!":"121645100408832000", "b!":"2432902008176640000"}`},
-		{`{"a":49, "b":50}`, 200, `{"a!":"608281864034267560872252163321295376887552831379210240000000000", "b!":"30414093201713378043612608166064768844377641568960512000000000000"}`},
+		{`{"numbers": [19, 20]}`, 200, `[121645100408832000,2432902008176640000]`},
+		{`{"numbers": [49, 50]}`, 200, `[608281864034267560872252163321295376887552831379210240000000000,30414093201713378043612608166064768844377641568960512000000000000]`},
 	}
 
 	router := httprouter.New()

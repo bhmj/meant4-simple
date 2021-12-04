@@ -10,7 +10,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-const invalidInput string = `{ "error":"Incorrect input"}`
+const errInvalidInput string = `{ "error":"Incorrect input"}`
+const errTwoNumbersExpected string = `{ "error":"Only two numbers expected in v1"}`
 
 func factorial(n int, ch chan *big.Int) {
 	bn := big.NewInt(int64(n))
@@ -38,38 +39,44 @@ func calculate(a, b int) (resultA, resultB *big.Int) {
 	return resultA, resultB
 }
 
-// Query holds input values
-type Query struct {
-	A int `json:"a"`
-	B int `jsob:"b"`
+type inputQuery struct {
+	Numbers []int `json:"numbers"`
 }
 
 // safeFactorial is a wrapper that checks input
 func safeFactorial(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var q Query
+	var q inputQuery
 	// always return json
 	w.Header().Set("Content-Type", "application/json")
 	// decore input
 	err := json.NewDecoder(r.Body).Decode(&q)
 	if err != nil {
-		http.Error(w, invalidInput, http.StatusBadRequest)
+		http.Error(w, errInvalidInput, http.StatusBadRequest)
+		return
+	}
+	if len(q.Numbers) != 2 {
+		http.Error(w, errTwoNumbersExpected, http.StatusBadRequest)
 		return
 	}
 	// check values
-	if q.A <= 0 || q.B <= 0 {
-		http.Error(w, invalidInput, http.StatusBadRequest)
+	if q.Numbers[0] <= 0 || q.Numbers[1] <= 0 {
+		http.Error(w, errInvalidInput, http.StatusBadRequest)
 		return
 	}
 	// calculate
-	resA, resB := calculate(q.A, q.B)
-	// response
-	fmt.Fprintf(w, `{"a!":"%s", "b!":"%s"}`, resA.Text(10), resB.Text(10))
+	resA, resB := calculate(q.Numbers[0], q.Numbers[1])
+	// serialize response
+	buf, err := json.Marshal([]*big.Int{resA, resB})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprint(w, string(buf))
 }
 
 func main() {
+	fmt.Println("Factorial calculating service\nUsage: POST localhost:8989/factorial with body { \"numbers\": [num1, num2] }\nCtrl+C to stop")
 	router := httprouter.New()
 	router.POST("/calculate", safeFactorial)
-
-	fmt.Println("Starting factorial calculator...")
 	log.Fatal(http.ListenAndServe(":8989", router))
 }
