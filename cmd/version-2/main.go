@@ -76,7 +76,7 @@ func handleCalculate(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	var query inputQuery
 	// always return json
 	w.Header().Set("Content-Type", "application/json")
-	// decore input
+	// decode input
 	err := json.NewDecoder(r.Body).Decode(&query)
 	if err != nil {
 		http.Error(w, errInvalidInput.Error(), http.StatusBadRequest)
@@ -107,7 +107,7 @@ func handleCalculate(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 }
 
 func main() {
-	fmt.Println("Factorial calculating service\nUsage: POST localhost:8989/factorial with body { \"numbers\": [num1, num2] }\nCtrl+C to stop")
+	fmt.Println("Factorial calculating service\nUsage: POST localhost:8989/factorial with body { \"numbers\": [num1, num2, ..., numN] }\nCtrl+C to stop")
 	router := httprouter.New()
 	router.POST("/calculate", handleCalculate)
 	log.Fatal(http.ListenAndServe(":8989", router))

@@ -10,8 +10,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-const errInvalidInput string = `{ "error":"Incorrect input"}`
-const errTwoNumbersExpected string = `{ "error":"Only two numbers expected in v1"}`
+const errInvalidInput string = `{ "error":"Incorrect input" }`
+const errTwoNumbersExpected string = `{ "error":"Only two numbers expected in v1" }`
 
 func factorial(n int, ch chan *big.Int) {
 	bn := big.NewInt(int64(n))
@@ -48,7 +48,7 @@ func safeFactorial(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	var q inputQuery
 	// always return json
 	w.Header().Set("Content-Type", "application/json")
-	// decore input
+	// decode input
 	err := json.NewDecoder(r.Body).Decode(&q)
 	if err != nil {
 		http.Error(w, errInvalidInput, http.StatusBadRequest)

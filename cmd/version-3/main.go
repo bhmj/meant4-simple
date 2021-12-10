@@ -29,8 +29,8 @@ type queryParameter struct {
 }
 
 type spanResult struct {
-	High   int
-	Result *big.Int
+	HighBound int
+	Result    *big.Int
 }
 
 type valuedParameters []queryParameter
@@ -66,7 +66,7 @@ func factorialSpan(numbers []queryParameter, low, high int, target *spanResult) 
 		head++                       // int math
 	}
 
-	*target = spanResult{High: high, Result: result}
+	*target = spanResult{HighBound: high, Result: result}
 }
 
 const Parallelism int = 8 // TODO: count CPUs or ...?
@@ -81,24 +81,24 @@ func calculateFactorials(vp valuedParameters) []*big.Int {
 		threads = 1
 	}
 
-	spans := make(spanResults, threads)
+	results := make(spanResults, threads)
 
 	var wg sync.WaitGroup
-	low := 1
 
+	lowBound := 1
 	for i := 1; i <= threads; i++ {
 		// spawn parallel calculations
 		wg.Add(1)
-		high := maxNumber * i / threads
-		go func(low, high, pos int) { factorialSpan(vp, low, high, &spans[pos-1]); wg.Done() }(low, high, i)
-		low = high + 1
+		highBound := maxNumber * i / threads
+		go func(low, high, pos int) { factorialSpan(vp, low, high, &results[pos-1]); wg.Done() }(lowBound, highBound, i)
+		lowBound = highBound + 1
 	}
 	wg.Wait()
 
-	for _, span := range spans {
+	for _, result := range results {
 		for _, v := range vp {
-			if v.Number > span.High {
-				v.Result.Mul(v.Result, span.Result)
+			if v.Number > result.HighBound {
+				v.Result.Mul(v.Result, result.Result)
 			}
 		}
 	}
@@ -117,7 +117,7 @@ func handleCalculate(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	var query inputQuery
 	// always return json
 	w.Header().Set("Content-Type", "application/json")
-	// decore input
+	// decode input
 	err := json.NewDecoder(r.Body).Decode(&query)
 	if err != nil {
 		http.Error(w, errInvalidInput.Error(), http.StatusBadRequest)
@@ -148,7 +148,7 @@ func handleCalculate(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 }
 
 func main() {
-	fmt.Println("Factorial calculating service\nUsage: POST localhost:8989/factorial with body { \"numbers\": [num1, num2] }\nCtrl+C to stop")
+	fmt.Println("Factorial calculating service\nUsage: POST localhost:8989/factorial with body { \"numbers\": [num1, num2, ..., numN] }\nCtrl+C to stop")
 	router := httprouter.New()
 	router.POST("/calculate", handleCalculate)
 	log.Fatal(http.ListenAndServe(":8989", router))
