@@ -148,7 +148,7 @@ func handleCalculate(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 }
 
 func main() {
-	fmt.Println("Factorial calculating service\nUsage: POST localhost:8989/factorial with body { \"numbers\": [num1, num2, ..., numN] }\nCtrl+C to stop")
+	fmt.Println("Factorial calculating service\nUsage: POST localhost:8989/calculate with body { \"numbers\": [num1, num2, ..., numN] }\nCtrl+C to stop")
 	router := httprouter.New()
 	router.POST("/calculate", handleCalculate)
 	log.Fatal(http.ListenAndServe(":8989", router))
