@@ -75,8 +75,8 @@ func safeFactorial(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 }
 
 func main() {
-	fmt.Println("Factorial calculating service\nUsage: POST localhost:8989/calculate with body { \"numbers\": [num1, num2] }\nCtrl+C to stop")
+	fmt.Println("Factorial calculating service\nUsage: POST localhost:8989/factorial with body { \"numbers\": [num1, num2] }\nCtrl+C to stop")
 	router := httprouter.New()
-	router.POST("/calculate", safeFactorial)
+	router.POST("/factorial", safeFactorial)
 	log.Fatal(http.ListenAndServe(":8989", router))
 }

@@ -32,12 +32,12 @@ func TestMain(t *testing.T) {
 	}
 
 	router := httprouter.New()
-	router.POST("/calculate", safeFactorial)
+	router.POST("/factorial", safeFactorial)
 
 	for itst, tst := range tests {
 
 		reader := strings.NewReader(tst.Input)
-		req, err := http.NewRequest("POST", "/calculate", reader)
+		req, err := http.NewRequest("POST", "/factorial", reader)
 		if err != nil {
 			t.Fatal(err)
 		}

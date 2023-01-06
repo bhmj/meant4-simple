@@ -22,4 +22,4 @@ Run `make help` to get more info.
 
 Sample command:  
 
-`time curl --request POST --url http://localhost:8989/calculate --data '{"numbers": [200000, 300000]}' -o /dev/null`  
+`time curl --request POST --url http://localhost:8989/factorial --data '{"numbers": [200000, 300000]}' -o /dev/null`  
