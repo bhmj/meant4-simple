@@ -13,13 +13,17 @@ v1 : 10.90 seconds
 v2 : 9.47 seconds  
 v3 : 1.38 seconds  
 
-Compiled and checked with go 1.17.
+Add `"count": 1` parameter to get the number of bits in the result, not the actual numbers (see examples below).  
+
+Compiled and checked with go 1.17.  
 
 ## Building, testing and running
 
 Run `make all` to build all three versions in ./build/.  
 Run `make help` to get more info.  
 
-Sample command:  
+Sample commands:  
 
 `time curl --request POST --url http://localhost:8989/factorial --data '{"numbers": [200000, 300000]}' -o /dev/null`  
+
+`time curl --request POST --url http://localhost:8989/factorial --data '{"numbers": [200000, 300000], "count": 1}'`  

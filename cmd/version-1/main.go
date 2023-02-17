@@ -40,6 +40,7 @@ func calculate(a, b int) (resultA, resultB *big.Int) {
 }
 
 type inputQuery struct {
+	Count   int   `json:"count"`
 	Numbers []int `json:"numbers"`
 }
 
@@ -65,6 +66,21 @@ func safeFactorial(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	}
 	// calculate
 	resA, resB := calculate(q.Numbers[0], q.Numbers[1])
+
+	// short output: number of bits
+	if q.Count > 0 {
+		short := make([]int, 2)
+		short[0] = resA.BitLen()
+		short[1] = resB.BitLen()
+		buf, err := json.Marshal(short)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprint(w, string(buf))
+		return
+	}
+
 	// serialize response
 	buf, err := json.Marshal([]*big.Int{resA, resB})
 	if err != nil {

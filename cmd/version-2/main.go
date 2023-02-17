@@ -18,6 +18,7 @@ var (
 )
 
 type inputQuery struct {
+	Count   int   `json:"count"`
 	Numbers []int `json:"numbers"`
 }
 
@@ -97,6 +98,21 @@ func handleCalculate(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 	}
 	// calculate
 	result := calculateFactorials(pp)
+
+	// short output: number of bits
+	if query.Count > 0 {
+		short := make([]int, len(result))
+		for i := range result {
+			short[i] = result[i].BitLen()
+		}
+		buf, err := json.Marshal(short)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprint(w, string(buf))
+		return
+	}
 	// serialize response
 	buf, err := json.Marshal(result)
 	if err != nil {
